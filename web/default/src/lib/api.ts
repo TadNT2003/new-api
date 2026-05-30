@@ -17,7 +17,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 For commercial licensing, please contact support@quantumnous.com
 */
 import axios, { type AxiosRequestConfig } from 'axios'
-import { t } from 'i18next'
+import i18next, { t } from 'i18next'
 import { toast } from 'sonner'
 import { useAuthStore } from '@/stores/auth-store'
 
@@ -158,13 +158,21 @@ export function getCommonHeaders(): Record<string, string> {
 // Request Interceptor
 // ============================================================================
 
-// Attach user ID header for all requests
+// Attach user ID and language preference headers for all requests
 api.interceptors.request.use((config) => {
   const uid = getUserId()
   if (uid) {
     // Custom header for user identification
     ;(config.headers as Record<string, string>)['New-Api-User'] = uid
   }
+
+  // Send the user's selected UI language so the backend responds in the same language.
+  // The browser's Accept-Language header reflects the OS locale, not the in-app setting.
+  const lang = i18next.language || 'en'
+  // Map frontend code 'zh' to the IETF tag the backend expects
+  const acceptLang = lang === 'zh' ? 'zh-CN' : lang
+  ;(config.headers as Record<string, string>)['Accept-Language'] = acceptLang
+
   return config
 })
 
