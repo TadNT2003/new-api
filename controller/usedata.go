@@ -50,7 +50,8 @@ func GetUserQuotaDates(c *gin.Context) {
 	if endTimestamp-startTimestamp > 2592000 {
 		c.JSON(http.StatusOK, gin.H{
 			"success": false,
-			"message": "时间跨度不能超过 1 个月",
+			// "message": "时间跨度不能超过 1 个月",
+			"message": "time span cannot exceed 1 month",
 		})
 		return
 	}

@@ -31,7 +31,8 @@ func LinuxDoBind(c *gin.Context) {
 	if !common.LinuxDOOAuthEnabled {
 		c.JSON(http.StatusOK, gin.H{
 			"success": false,
-			"message": "管理员未开启通过 Linux DO 登录以及注册",
+			// "message": "管理员未开启通过 Linux DO 登录以及注册",
+			"message": "administrator has not enabled Linux DO login and registration",
 		})
 		return
 	}
@@ -50,7 +51,8 @@ func LinuxDoBind(c *gin.Context) {
 	if model.IsLinuxDOIdAlreadyTaken(user.LinuxDOId) {
 		c.JSON(http.StatusOK, gin.H{
 			"success": false,
-			"message": "该 Linux DO 账户已被绑定",
+			// "message": "该 Linux DO 账户已被绑定",
+			"message": "this Linux DO account is already linked",
 		})
 		return
 	}
@@ -186,7 +188,8 @@ func LinuxdoOAuth(c *gin.Context) {
 	if !common.LinuxDOOAuthEnabled {
 		c.JSON(http.StatusOK, gin.H{
 			"success": false,
-			"message": "管理员未开启通过 Linux DO 登录以及注册",
+			// "message": "管理员未开启通过 Linux DO 登录以及注册",
+			"message": "administrator has not enabled Linux DO login and registration",
 		})
 		return
 	}
@@ -215,7 +218,8 @@ func LinuxdoOAuth(c *gin.Context) {
 		if user.Id == 0 {
 			c.JSON(http.StatusOK, gin.H{
 				"success": false,
-				"message": "用户已注销",
+				// "message": "用户已注销",
+				"message": "user account has been deactivated",
 			})
 			return
 		}
@@ -243,14 +247,16 @@ func LinuxdoOAuth(c *gin.Context) {
 			} else {
 				c.JSON(http.StatusOK, gin.H{
 					"success": false,
-					"message": "Linux DO 信任等级未达到管理员设置的最低信任等级",
+					// "message": "Linux DO 信任等级未达到管理员设置的最低信任等级",
+					"message": "Linux DO trust level does not meet the minimum trust level set by the administrator",
 				})
 				return
 			}
 		} else {
 			c.JSON(http.StatusOK, gin.H{
 				"success": false,
-				"message": "管理员关闭了新用户注册",
+				// "message": "管理员关闭了新用户注册",
+				"message": "administrator has disabled new user registration",
 			})
 			return
 		}
@@ -258,7 +264,8 @@ func LinuxdoOAuth(c *gin.Context) {
 
 	if user.Status != common.UserStatusEnabled {
 		c.JSON(http.StatusOK, gin.H{
-			"message": "用户已被封禁",
+			// "message": "用户已被封禁",
+			"message": "user has been banned",
 			"success": false,
 		})
 		return

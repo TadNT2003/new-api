@@ -35,7 +35,8 @@ type DiscordUser struct {
 
 func getDiscordUserInfoByCode(code string) (*DiscordUser, error) {
 	if code == "" {
-		return nil, errors.New("无效的参数")
+		// return nil, errors.New("无效的参数")
+		return nil, errors.New("invalid parameters")
 	}
 
 	values := url.Values{}
@@ -57,7 +58,8 @@ func getDiscordUserInfoByCode(code string) (*DiscordUser, error) {
 	res, err := client.Do(req)
 	if err != nil {
 		common.SysLog(err.Error())
-		return nil, errors.New("无法连接至 Discord 服务器，请稍后重试！")
+		// return nil, errors.New("无法连接至 Discord 服务器，请稍后重试！")
+		return nil, errors.New("failed to connect to Discord server, please try again later")
 	}
 	defer res.Body.Close()
 	var discordResponse DiscordResponse
@@ -67,8 +69,10 @@ func getDiscordUserInfoByCode(code string) (*DiscordUser, error) {
 	}
 
 	if discordResponse.AccessToken == "" {
-		common.SysError("Discord 获取 Token 失败，请检查设置！")
-		return nil, errors.New("Discord 获取 Token 失败，请检查设置！")
+		// common.SysError("Discord 获取 Token 失败，请检查设置！")
+		common.SysError("Discord token retrieval failed, please check settings")
+		// return nil, errors.New("Discord 获取 Token 失败，请检查设置！")
+		return nil, errors.New("Discord token retrieval failed, please check settings")
 	}
 
 	req, err = http.NewRequest("GET", "https://discord.com/api/v10/users/@me", nil)
@@ -79,12 +83,15 @@ func getDiscordUserInfoByCode(code string) (*DiscordUser, error) {
 	res2, err := client.Do(req)
 	if err != nil {
 		common.SysLog(err.Error())
-		return nil, errors.New("无法连接至 Discord 服务器，请稍后重试！")
+		// return nil, errors.New("无法连接至 Discord 服务器，请稍后重试！")
+		return nil, errors.New("failed to connect to Discord server, please try again later")
 	}
 	defer res2.Body.Close()
 	if res2.StatusCode != http.StatusOK {
-		common.SysError("Discord 获取用户信息失败！请检查设置！")
-		return nil, errors.New("Discord 获取用户信息失败！请检查设置！")
+		// common.SysError("Discord 获取用户信息失败！请检查设置！")
+		common.SysError("Discord failed to get user info, please check settings")
+		// return nil, errors.New("Discord 获取用户信息失败！请检查设置！")
+		return nil, errors.New("Discord failed to get user info, please check settings")
 	}
 
 	var discordUser DiscordUser
@@ -93,8 +100,10 @@ func getDiscordUserInfoByCode(code string) (*DiscordUser, error) {
 		return nil, err
 	}
 	if discordUser.UID == "" || discordUser.ID == "" {
-		common.SysError("Discord 获取用户信息为空！请检查设置！")
-		return nil, errors.New("Discord 获取用户信息为空！请检查设置！")
+		// common.SysError("Discord 获取用户信息为空！请检查设置！")
+		common.SysError("Discord user info is empty, please check settings")
+		// return nil, errors.New("Discord 获取用户信息为空！请检查设置！")
+		return nil, errors.New("Discord user info is empty, please check settings")
 	}
 	return &discordUser, nil
 }
@@ -117,7 +126,8 @@ func DiscordOAuth(c *gin.Context) {
 	if !system_setting.GetDiscordSettings().Enabled {
 		c.JSON(http.StatusOK, gin.H{
 			"success": false,
-			"message": "管理员未开启通过 Discord 登录以及注册",
+			// "message": "管理员未开启通过 Discord 登录以及注册",
+			"message": "administrator has not enabled Discord login and registration",
 		})
 		return
 	}
@@ -162,7 +172,8 @@ func DiscordOAuth(c *gin.Context) {
 		} else {
 			c.JSON(http.StatusOK, gin.H{
 				"success": false,
-				"message": "管理员关闭了新用户注册",
+				// "message": "管理员关闭了新用户注册",
+				"message": "administrator has disabled new user registration",
 			})
 			return
 		}
@@ -170,7 +181,8 @@ func DiscordOAuth(c *gin.Context) {
 
 	if user.Status != common.UserStatusEnabled {
 		c.JSON(http.StatusOK, gin.H{
-			"message": "用户已被封禁",
+			// "message": "用户已被封禁",
+			"message": "user has been banned",
 			"success": false,
 		})
 		return
@@ -182,7 +194,8 @@ func DiscordBind(c *gin.Context) {
 	if !system_setting.GetDiscordSettings().Enabled {
 		c.JSON(http.StatusOK, gin.H{
 			"success": false,
-			"message": "管理员未开启通过 Discord 登录以及注册",
+			// "message": "管理员未开启通过 Discord 登录以及注册",
+			"message": "administrator has not enabled Discord login and registration",
 		})
 		return
 	}
@@ -198,7 +211,8 @@ func DiscordBind(c *gin.Context) {
 	if model.IsDiscordIdAlreadyTaken(user.DiscordId) {
 		c.JSON(http.StatusOK, gin.H{
 			"success": false,
-			"message": "该 Discord 账户已被绑定",
+			// "message": "该 Discord 账户已被绑定",
+			"message": "this Discord account is already linked",
 		})
 		return
 	}

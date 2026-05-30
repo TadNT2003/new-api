@@ -38,11 +38,13 @@ func ConfirmPaymentCompliance(c *gin.Context) {
 
 	var req PaymentComplianceRequest
 	if err := common.DecodeJson(c.Request.Body, &req); err != nil {
-		common.ApiErrorMsg(c, "参数错误")
+		// common.ApiErrorMsg(c, "参数错误")
+		common.ApiErrorMsg(c, "parameter error")
 		return
 	}
 	if !req.Confirmed {
-		common.ApiErrorMsg(c, "请确认合规声明")
+		// common.ApiErrorMsg(c, "请确认合规声明")
+		common.ApiErrorMsg(c, "please confirm the compliance declaration")
 		return
 	}
 
