@@ -4,13 +4,13 @@ import (
 	"encoding/json"
 	"errors"
 
+	"github.com/QuantumNous/new-api/common"
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-gonic/gin"
 	webauthn "github.com/go-webauthn/webauthn/webauthn"
 )
 
-// var errSessionNotFound = errors.New("Passkey 会话不存在或已过期")
-var errSessionNotFound = errors.New("Passkey session does not exist or has expired")
+var errSessionNotFound = errors.New(common.LanguageString("Passkey session does not exist or has expired", "Passkey 会话不存在或已过期"))
 
 func SaveSessionData(c *gin.Context, key string, data *webauthn.SessionData) error {
 	session := sessions.Default(c)
@@ -45,8 +45,7 @@ func PopSessionData(c *gin.Context, key string) (*webauthn.SessionData, error) {
 			return nil, err
 		}
 	default:
-		// return nil, errors.New("Passkey 会话格式无效")
-		return nil, errors.New("invalid Passkey session format")
+		return nil, errors.New(common.LanguageString("invalid Passkey session format", "Passkey 会话格式无效"))
 	}
 	return &data, nil
 }

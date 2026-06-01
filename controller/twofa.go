@@ -42,8 +42,7 @@ func Setup2FA(c *gin.Context) {
 	if existing != nil && existing.IsEnabled {
 		c.JSON(http.StatusOK, gin.H{
 			"success": false,
-			// "message": "用户已启用2FA，请先禁用后重新设置",
-			"message": "user already has 2FA enabled, please disable it first before reconfiguring",
+			"message": common.LanguageString("user already has 2FA enabled, please disable it first before reconfiguring", "用户已启用2FA，请先禁用后重新设置"),
 		})
 		return
 	}
@@ -69,10 +68,8 @@ func Setup2FA(c *gin.Context) {
 	if err != nil {
 		c.JSON(http.StatusOK, gin.H{
 			"success": false,
-			// "message": "生成2FA密钥失败",
-			"message": "failed to generate 2FA key",
+			"message": common.LanguageString("failed to generate 2FA key", "生成2FA密钥失败"),
 		})
-		// common.SysLog("生成TOTP密钥失败: " + err.Error())
 		common.SysLog("failed to generate TOTP key: " + err.Error())
 		return
 	}
@@ -82,10 +79,8 @@ func Setup2FA(c *gin.Context) {
 	if err != nil {
 		c.JSON(http.StatusOK, gin.H{
 			"success": false,
-			// "message": "生成备用码失败",
-			"message": "failed to generate backup codes",
+			"message": common.LanguageString("failed to generate backup codes", "生成备用码失败"),
 		})
-		// common.SysLog("生成备用码失败: " + err.Error())
 		common.SysLog("failed to generate backup codes: " + err.Error())
 		return
 	}
@@ -118,22 +113,18 @@ func Setup2FA(c *gin.Context) {
 	if err := model.CreateBackupCodes(userId, backupCodes); err != nil {
 		c.JSON(http.StatusOK, gin.H{
 			"success": false,
-			// "message": "保存备用码失败",
-			"message": "failed to save backup codes",
+			"message": common.LanguageString("failed to save backup codes", "保存备用码失败"),
 		})
-		// common.SysLog("保存备用码失败: " + err.Error())
 		common.SysLog("failed to save backup codes: " + err.Error())
 		return
 	}
 
 	// 记录操作日志
-	// model.RecordLog(userId, model.LogTypeSystem, "开始设置两步验证")
-	model.RecordLog(userId, model.LogTypeSystem, "started setting up two-factor authentication")
+	model.RecordLog(userId, model.LogTypeSystem, common.LanguageString("started setting up two-factor authentication", "开始设置两步验证"))
 
 	c.JSON(http.StatusOK, gin.H{
 		"success": true,
-		// "message": "2FA设置初始化成功，请使用认证器扫描二维码并输入验证码完成设置",
-		"message": "2FA setup initialized successfully, please scan the QR code with your authenticator app and enter the verification code to complete setup",
+		"message": common.LanguageString("2FA setup initialized successfully, please scan the QR code with your authenticator app and enter the verification code to complete setup", "2FA设置初始化成功，请使用认证器扫描二维码并输入验证码完成设置"),
 		"data": Setup2FAResponse{
 			Secret:      key.Secret(),
 			QRCodeData:  qrCodeData,
@@ -148,8 +139,7 @@ func Enable2FA(c *gin.Context) {
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusOK, gin.H{
 			"success": false,
-			// "message": "参数错误",
-			"message": "parameter error",
+			"message": common.LanguageString("parameter error", "参数错误"),
 		})
 		return
 	}
@@ -165,16 +155,14 @@ func Enable2FA(c *gin.Context) {
 	if twoFA == nil {
 		c.JSON(http.StatusOK, gin.H{
 			"success": false,
-			// "message": "请先完成2FA初始化设置",
-			"message": "please complete 2FA initialization first",
+			"message": common.LanguageString("please complete 2FA initialization first", "请先完成2FA初始化设置"),
 		})
 		return
 	}
 	if twoFA.IsEnabled {
 		c.JSON(http.StatusOK, gin.H{
 			"success": false,
-			// "message": "2FA已经启用",
-			"message": "2FA is already enabled",
+			"message": common.LanguageString("2FA is already enabled", "2FA已经启用"),
 		})
 		return
 	}
@@ -192,8 +180,7 @@ func Enable2FA(c *gin.Context) {
 	if !common.ValidateTOTPCode(twoFA.Secret, cleanCode) {
 		c.JSON(http.StatusOK, gin.H{
 			"success": false,
-			// "message": "验证码或备用码错误，请重试",
-			"message": "verification code or backup code is incorrect, please retry",
+			"message": common.LanguageString("verification code or backup code is incorrect, please retry", "验证码或备用码错误，请重试"),
 		})
 		return
 	}
@@ -205,13 +192,11 @@ func Enable2FA(c *gin.Context) {
 	}
 
 	// 记录操作日志
-	// model.RecordLog(userId, model.LogTypeSystem, "成功启用两步验证")
-	model.RecordLog(userId, model.LogTypeSystem, "successfully enabled two-factor authentication")
+	model.RecordLog(userId, model.LogTypeSystem, common.LanguageString("successfully enabled two-factor authentication", "成功启用两步验证"))
 
 	c.JSON(http.StatusOK, gin.H{
 		"success": true,
-		// "message": "两步验证启用成功",
-		"message": "two-factor authentication enabled successfully",
+		"message": common.LanguageString("two-factor authentication enabled successfully", "两步验证启用成功"),
 	})
 }
 
@@ -221,8 +206,7 @@ func Disable2FA(c *gin.Context) {
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusOK, gin.H{
 			"success": false,
-			// "message": "参数错误",
-			"message": "parameter error",
+			"message": common.LanguageString("parameter error", "参数错误"),
 		})
 		return
 	}
@@ -238,8 +222,7 @@ func Disable2FA(c *gin.Context) {
 	if twoFA == nil || !twoFA.IsEnabled {
 		c.JSON(http.StatusOK, gin.H{
 			"success": false,
-			// "message": "用户未启用2FA",
-			"message": "user has not enabled 2FA",
+			"message": common.LanguageString("user has not enabled 2FA", "用户未启用2FA"),
 		})
 		return
 	}
@@ -269,8 +252,7 @@ func Disable2FA(c *gin.Context) {
 	if !isValidTOTP && !isValidBackup {
 		c.JSON(http.StatusOK, gin.H{
 			"success": false,
-			// "message": "验证码或备用码错误，请重试",
-			"message": "verification code or backup code is incorrect, please retry",
+			"message": common.LanguageString("verification code or backup code is incorrect, please retry", "验证码或备用码错误，请重试"),
 		})
 		return
 	}
@@ -282,13 +264,11 @@ func Disable2FA(c *gin.Context) {
 	}
 
 	// 记录操作日志
-	// model.RecordLog(userId, model.LogTypeSystem, "禁用两步验证")
-	model.RecordLog(userId, model.LogTypeSystem, "disabled two-factor authentication")
+	model.RecordLog(userId, model.LogTypeSystem, common.LanguageString("disabled two-factor authentication", "禁用两步验证"))
 
 	c.JSON(http.StatusOK, gin.H{
 		"success": true,
-		// "message": "两步验证已禁用",
-		"message": "two-factor authentication has been disabled",
+		"message": common.LanguageString("two-factor authentication has been disabled", "两步验证已禁用"),
 	})
 }
 
@@ -314,8 +294,7 @@ func Get2FAStatus(c *gin.Context) {
 			// 获取剩余备用码数量
 			backupCount, err := model.GetUnusedBackupCodeCount(userId)
 			if err != nil {
-				// common.SysLog("获取备用码数量失败: " + err.Error())
-			common.SysLog("failed to get backup code count: " + err.Error())
+				common.SysLog("failed to get backup code count: " + err.Error())
 			} else {
 				status["backup_codes_remaining"] = backupCount
 			}
@@ -335,8 +314,7 @@ func RegenerateBackupCodes(c *gin.Context) {
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusOK, gin.H{
 			"success": false,
-			// "message": "参数错误",
-			"message": "parameter error",
+			"message": common.LanguageString("parameter error", "参数错误"),
 		})
 		return
 	}
@@ -352,8 +330,7 @@ func RegenerateBackupCodes(c *gin.Context) {
 	if twoFA == nil || !twoFA.IsEnabled {
 		c.JSON(http.StatusOK, gin.H{
 			"success": false,
-			// "message": "用户未启用2FA",
-			"message": "user has not enabled 2FA",
+			"message": common.LanguageString("user has not enabled 2FA", "用户未启用2FA"),
 		})
 		return
 	}
@@ -379,8 +356,7 @@ func RegenerateBackupCodes(c *gin.Context) {
 	if !valid {
 		c.JSON(http.StatusOK, gin.H{
 			"success": false,
-			// "message": "验证码或备用码错误，请重试",
-			"message": "verification code or backup code is incorrect, please retry",
+			"message": common.LanguageString("verification code or backup code is incorrect, please retry", "验证码或备用码错误，请重试"),
 		})
 		return
 	}
@@ -390,10 +366,8 @@ func RegenerateBackupCodes(c *gin.Context) {
 	if err != nil {
 		c.JSON(http.StatusOK, gin.H{
 			"success": false,
-			// "message": "生成备用码失败",
-			"message": "failed to generate backup codes",
+			"message": common.LanguageString("failed to generate backup codes", "生成备用码失败"),
 		})
-		// common.SysLog("生成备用码失败: " + err.Error())
 		common.SysLog("failed to generate backup codes: " + err.Error())
 		return
 	}
@@ -402,22 +376,18 @@ func RegenerateBackupCodes(c *gin.Context) {
 	if err := model.CreateBackupCodes(userId, backupCodes); err != nil {
 		c.JSON(http.StatusOK, gin.H{
 			"success": false,
-			// "message": "保存备用码失败",
-			"message": "failed to save backup codes",
+			"message": common.LanguageString("failed to save backup codes", "保存备用码失败"),
 		})
-		// common.SysLog("保存备用码失败: " + err.Error())
 		common.SysLog("failed to save backup codes: " + err.Error())
 		return
 	}
 
 	// 记录操作日志
-	// model.RecordLog(userId, model.LogTypeSystem, "重新生成两步验证备用码")
-	model.RecordLog(userId, model.LogTypeSystem, "regenerated two-factor authentication backup codes")
+	model.RecordLog(userId, model.LogTypeSystem, common.LanguageString("regenerated two-factor authentication backup codes", "重新生成两步验证备用码"))
 
 	c.JSON(http.StatusOK, gin.H{
 		"success": true,
-		// "message": "备用码重新生成成功",
-		"message": "backup codes regenerated successfully",
+		"message": common.LanguageString("backup codes regenerated successfully", "备用码重新生成成功"),
 		"data": map[string]interface{}{
 			"backup_codes": backupCodes,
 		},
@@ -430,8 +400,7 @@ func Verify2FALogin(c *gin.Context) {
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusOK, gin.H{
 			"success": false,
-			// "message": "参数错误",
-			"message": "parameter error",
+			"message": common.LanguageString("parameter error", "参数错误"),
 		})
 		return
 	}
@@ -442,8 +411,7 @@ func Verify2FALogin(c *gin.Context) {
 	if pendingUserId == nil {
 		c.JSON(http.StatusOK, gin.H{
 			"success": false,
-			// "message": "会话已过期，请重新登录",
-			"message": "session has expired, please log in again",
+			"message": common.LanguageString("session has expired, please log in again", "会话已过期，请重新登录"),
 		})
 		return
 	}
@@ -451,8 +419,7 @@ func Verify2FALogin(c *gin.Context) {
 	if !ok {
 		c.JSON(http.StatusOK, gin.H{
 			"success": false,
-			// "message": "会话数据无效，请重新登录",
-			"message": "session data is invalid, please log in again",
+			"message": common.LanguageString("session data is invalid, please log in again", "会话数据无效，请重新登录"),
 		})
 		return
 	}
@@ -461,8 +428,7 @@ func Verify2FALogin(c *gin.Context) {
 	if err != nil {
 		c.JSON(http.StatusOK, gin.H{
 			"success": false,
-			// "message": "用户不存在",
-			"message": "user does not exist",
+			"message": common.LanguageString("user does not exist", "用户不存在"),
 		})
 		return
 	}
@@ -476,8 +442,7 @@ func Verify2FALogin(c *gin.Context) {
 	if twoFA == nil || !twoFA.IsEnabled {
 		c.JSON(http.StatusOK, gin.H{
 			"success": false,
-			// "message": "用户未启用2FA",
-			"message": "user has not enabled 2FA",
+			"message": common.LanguageString("user has not enabled 2FA", "用户未启用2FA"),
 		})
 		return
 	}
@@ -507,8 +472,7 @@ func Verify2FALogin(c *gin.Context) {
 	if !isValidTOTP && !isValidBackup {
 		c.JSON(http.StatusOK, gin.H{
 			"success": false,
-			// "message": "验证码或备用码错误，请重试",
-			"message": "verification code or backup code is incorrect, please retry",
+			"message": common.LanguageString("verification code or backup code is incorrect, please retry", "验证码或备用码错误，请重试"),
 		})
 		return
 	}
@@ -543,8 +507,7 @@ func AdminDisable2FA(c *gin.Context) {
 	if err != nil {
 		c.JSON(http.StatusOK, gin.H{
 			"success": false,
-			// "message": "用户ID格式错误",
-			"message": "invalid user ID format",
+			"message": common.LanguageString("invalid user ID format", "用户ID格式错误"),
 		})
 		return
 	}
@@ -560,8 +523,7 @@ func AdminDisable2FA(c *gin.Context) {
 	if !canManageTargetRole(myRole, targetUser.Role) {
 		c.JSON(http.StatusOK, gin.H{
 			"success": false,
-			// "message": "无权操作同级或更高级用户的2FA设置",
-			"message": "no permission to manage 2FA settings of users with equal or higher role",
+			"message": common.LanguageString("no permission to manage 2FA settings of users with equal or higher role", "无权操作同级或更高级用户的2FA设置"),
 		})
 		return
 	}
@@ -571,8 +533,7 @@ func AdminDisable2FA(c *gin.Context) {
 		if errors.Is(err, model.ErrTwoFANotEnabled) {
 			c.JSON(http.StatusOK, gin.H{
 				"success": false,
-				// "message": "用户未启用2FA",
-				"message": "user has not enabled 2FA",
+				"message": common.LanguageString("user has not enabled 2FA", "用户未启用2FA"),
 			})
 			return
 		}
@@ -588,12 +549,10 @@ func AdminDisable2FA(c *gin.Context) {
 		"admin_username": adminName,
 	}
 	model.RecordLogWithAdminInfo(userId, model.LogTypeManage,
-		// "管理员强制禁用了用户的两步验证",
-		"administrator has forcibly disabled user two-factor authentication", adminInfo)
+		common.LanguageString("administrator has forcibly disabled user two-factor authentication", "管理员强制禁用了用户的两步验证"), adminInfo)
 
 	c.JSON(http.StatusOK, gin.H{
 		"success": true,
-		// "message": "用户2FA已被强制禁用",
-		"message": "user 2FA has been forcibly disabled",
+		"message": common.LanguageString("user 2FA has been forcibly disabled", "用户2FA已被强制禁用"),
 	})
 }

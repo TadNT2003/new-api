@@ -35,8 +35,7 @@ type DiscordUser struct {
 
 func getDiscordUserInfoByCode(code string) (*DiscordUser, error) {
 	if code == "" {
-		// return nil, errors.New("无效的参数")
-		return nil, errors.New("invalid parameters")
+		return nil, errors.New(common.LanguageString("invalid parameters", "无效的参数"))
 	}
 
 	values := url.Values{}
@@ -58,8 +57,7 @@ func getDiscordUserInfoByCode(code string) (*DiscordUser, error) {
 	res, err := client.Do(req)
 	if err != nil {
 		common.SysLog(err.Error())
-		// return nil, errors.New("无法连接至 Discord 服务器，请稍后重试！")
-		return nil, errors.New("failed to connect to Discord server, please try again later")
+		return nil, errors.New(common.LanguageString("failed to connect to Discord server, please try again later", "无法连接至 Discord 服务器，请稍后重试！"))
 	}
 	defer res.Body.Close()
 	var discordResponse DiscordResponse
@@ -69,10 +67,8 @@ func getDiscordUserInfoByCode(code string) (*DiscordUser, error) {
 	}
 
 	if discordResponse.AccessToken == "" {
-		// common.SysError("Discord 获取 Token 失败，请检查设置！")
-		common.SysError("Discord token retrieval failed, please check settings")
-		// return nil, errors.New("Discord 获取 Token 失败，请检查设置！")
-		return nil, errors.New("Discord token retrieval failed, please check settings")
+		common.SysError(common.LanguageString("Discord token retrieval failed, please check settings", "Discord 获取 Token 失败，请检查设置！"))
+		return nil, errors.New(common.LanguageString("Discord token retrieval failed, please check settings", "Discord 获取 Token 失败，请检查设置！"))
 	}
 
 	req, err = http.NewRequest("GET", "https://discord.com/api/v10/users/@me", nil)
@@ -83,15 +79,12 @@ func getDiscordUserInfoByCode(code string) (*DiscordUser, error) {
 	res2, err := client.Do(req)
 	if err != nil {
 		common.SysLog(err.Error())
-		// return nil, errors.New("无法连接至 Discord 服务器，请稍后重试！")
-		return nil, errors.New("failed to connect to Discord server, please try again later")
+		return nil, errors.New(common.LanguageString("failed to connect to Discord server, please try again later", "无法连接至 Discord 服务器，请稍后重试！"))
 	}
 	defer res2.Body.Close()
 	if res2.StatusCode != http.StatusOK {
-		// common.SysError("Discord 获取用户信息失败！请检查设置！")
-		common.SysError("Discord failed to get user info, please check settings")
-		// return nil, errors.New("Discord 获取用户信息失败！请检查设置！")
-		return nil, errors.New("Discord failed to get user info, please check settings")
+		common.SysError(common.LanguageString("Discord failed to get user info, please check settings", "Discord 获取用户信息失败！请检查设置！"))
+		return nil, errors.New(common.LanguageString("Discord failed to get user info, please check settings", "Discord 获取用户信息失败！请检查设置！"))
 	}
 
 	var discordUser DiscordUser
@@ -100,10 +93,8 @@ func getDiscordUserInfoByCode(code string) (*DiscordUser, error) {
 		return nil, err
 	}
 	if discordUser.UID == "" || discordUser.ID == "" {
-		// common.SysError("Discord 获取用户信息为空！请检查设置！")
-		common.SysError("Discord user info is empty, please check settings")
-		// return nil, errors.New("Discord 获取用户信息为空！请检查设置！")
-		return nil, errors.New("Discord user info is empty, please check settings")
+		common.SysError(common.LanguageString("Discord user info is empty, please check settings", "Discord 获取用户信息为空！请检查设置！"))
+		return nil, errors.New(common.LanguageString("Discord user info is empty, please check settings", "Discord 获取用户信息为空！请检查设置！"))
 	}
 	return &discordUser, nil
 }
@@ -126,8 +117,7 @@ func DiscordOAuth(c *gin.Context) {
 	if !system_setting.GetDiscordSettings().Enabled {
 		c.JSON(http.StatusOK, gin.H{
 			"success": false,
-			// "message": "管理员未开启通过 Discord 登录以及注册",
-			"message": "administrator has not enabled Discord login and registration",
+			"message": common.LanguageString("administrator has not enabled Discord login and registration", "管理员未开启通过 Discord 登录以及注册"),
 		})
 		return
 	}
@@ -172,8 +162,7 @@ func DiscordOAuth(c *gin.Context) {
 		} else {
 			c.JSON(http.StatusOK, gin.H{
 				"success": false,
-				// "message": "管理员关闭了新用户注册",
-				"message": "administrator has disabled new user registration",
+				"message": common.LanguageString("administrator has disabled new user registration", "管理员关闭了新用户注册"),
 			})
 			return
 		}
@@ -181,8 +170,7 @@ func DiscordOAuth(c *gin.Context) {
 
 	if user.Status != common.UserStatusEnabled {
 		c.JSON(http.StatusOK, gin.H{
-			// "message": "用户已被封禁",
-			"message": "user has been banned",
+			"message": common.LanguageString("user has been banned", "用户已被封禁"),
 			"success": false,
 		})
 		return
@@ -194,8 +182,7 @@ func DiscordBind(c *gin.Context) {
 	if !system_setting.GetDiscordSettings().Enabled {
 		c.JSON(http.StatusOK, gin.H{
 			"success": false,
-			// "message": "管理员未开启通过 Discord 登录以及注册",
-			"message": "administrator has not enabled Discord login and registration",
+			"message": common.LanguageString("administrator has not enabled Discord login and registration", "管理员未开启通过 Discord 登录以及注册"),
 		})
 		return
 	}
@@ -211,8 +198,7 @@ func DiscordBind(c *gin.Context) {
 	if model.IsDiscordIdAlreadyTaken(user.DiscordId) {
 		c.JSON(http.StatusOK, gin.H{
 			"success": false,
-			// "message": "该 Discord 账户已被绑定",
-			"message": "this Discord account is already linked",
+			"message": common.LanguageString("this Discord account is already linked", "该 Discord 账户已被绑定"),
 		})
 		return
 	}

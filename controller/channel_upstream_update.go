@@ -279,8 +279,7 @@ func fetchChannelUpstreamModelIDs(channel *model.Channel) ([]string, error) {
 	if channel.Type == constant.ChannelTypeGemini {
 		key, _, apiErr := channel.GetNextEnabledKey()
 		if apiErr != nil {
-			// return nil, fmt.Errorf("获取渠道密钥失败: %w", apiErr)
-			return nil, fmt.Errorf("failed to get channel key: %w", apiErr)
+			return nil, fmt.Errorf(common.LanguageString("failed to get channel key: %w", "获取渠道密钥失败: %w"), apiErr)
 		}
 		key = strings.TrimSpace(key)
 		models, err := gemini.FetchGeminiModels(baseURL, key, channel.GetSetting().Proxy)
@@ -318,8 +317,7 @@ func fetchChannelUpstreamModelIDs(channel *model.Channel) ([]string, error) {
 
 	key, _, apiErr := channel.GetNextEnabledKey()
 	if apiErr != nil {
-		// return nil, fmt.Errorf("获取渠道密钥失败: %w", apiErr)
-		return nil, fmt.Errorf("failed to get channel key: %w", apiErr)
+		return nil, fmt.Errorf(common.LanguageString("failed to get channel key: %w", "获取渠道密钥失败: %w"), apiErr)
 	}
 	key = strings.TrimSpace(key)
 
@@ -477,14 +475,12 @@ func buildUpstreamModelUpdateTaskNotificationContent(
 
 	if len(channelSummaries) > 0 {
 		displayCount := min(len(channelSummaries), channelUpstreamModelUpdateNotifyMaxChannelDetails)
-		// builder.WriteString(fmt.Sprintf("\n\n变更渠道明细（展示 %d/%d）：", displayCount, len(channelSummaries)))
-		builder.WriteString(fmt.Sprintf("\n\nChanged channel details (showing %d/%d):", displayCount, len(channelSummaries)))
+		builder.WriteString(fmt.Sprintf(common.LanguageString("\n\nChanged channel details (showing %d/%d):", "\n\n变更渠道明细（展示 %d/%d）："), displayCount, len(channelSummaries)))
 		for _, summary := range channelSummaries[:displayCount] {
 			builder.WriteString(fmt.Sprintf("\n- %s (+%d / -%d)", summary.ChannelName, summary.AddCount, summary.RemoveCount))
 		}
 		if len(channelSummaries) > displayCount {
-			// builder.WriteString(fmt.Sprintf("\n- 其余 %d 个渠道已省略", len(channelSummaries)-displayCount))
-			builder.WriteString(fmt.Sprintf("\n- and %d more channels omitted", len(channelSummaries)-displayCount))
+			builder.WriteString(fmt.Sprintf(common.LanguageString("\n- and %d more channels omitted", "\n- 其余 %d 个渠道已省略"), len(channelSummaries)-displayCount))
 		}
 	}
 
@@ -671,8 +667,7 @@ func runChannelUpstreamModelUpdateTaskOnce() {
 			return
 		}
 		service.NotifyUpstreamModelUpdateWatchers(
-			// "上游模型巡检通知",
-			"Upstream Model Inspection Notification",
+			common.LanguageString("Upstream Model Inspection Notification", "上游模型巡检通知"),
 			buildUpstreamModelUpdateTaskNotificationContent(
 				checkedChannels,
 				changedChannels,

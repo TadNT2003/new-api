@@ -506,11 +506,9 @@ func testChannel(channel *model.Channel, testUserID int, testModel string, endpo
 		PromptTokens:     usage.PromptTokens,
 		CompletionTokens: usage.CompletionTokens,
 		ModelName:        info.OriginModelName,
-		// TokenName:        "模型测试",
-		TokenName: "model test",
+		TokenName: common.LanguageString("model test", "模型测试"),
 		Quota:     quota,
-		// Content:          "模型测试",
-		Content: "model test",
+		Content: common.LanguageString("model test", "模型测试"),
 		UseTimeSeconds:   int(consumedTime),
 		IsStream:         info.IsStream,
 		Group:            info.UsingGroup,
@@ -904,8 +902,7 @@ func testAllChannels(notify bool) error {
 	testAllChannelsLock.Lock()
 	if testAllChannelsRunning {
 		testAllChannelsLock.Unlock()
-		// return errors.New("测试已在运行中")
-		return errors.New("test is already running")
+		return errors.New(common.LanguageString("test is already running", "测试已在运行中"))
 	}
 	testAllChannelsRunning = true
 	testAllChannelsLock.Unlock()
@@ -945,8 +942,7 @@ func testAllChannels(notify bool) error {
 			// 当错误检查通过，才检查响应时间
 			if common.AutomaticDisableChannelEnabled && !shouldBanChannel {
 				if milliseconds > disableThreshold {
-					// err := fmt.Errorf("响应时间 %.2fs 超过阈值 %.2fs", float64(milliseconds)/1000.0, float64(disableThreshold)/1000.0)
-				err := fmt.Errorf("response time %.2fs exceeds threshold %.2fs", float64(milliseconds)/1000.0, float64(disableThreshold)/1000.0)
+					err := fmt.Errorf(common.LanguageString("response time %.2fs exceeds threshold %.2fs", "响应时间 %.2fs 超过阈值 %.2fs"), float64(milliseconds)/1000.0, float64(disableThreshold)/1000.0)
 					newAPIError = types.NewOpenAIError(err, types.ErrorCodeChannelResponseTimeExceeded, http.StatusRequestTimeout)
 					shouldBanChannel = true
 				}
@@ -967,8 +963,7 @@ func testAllChannels(notify bool) error {
 		}
 
 		if notify {
-			// service.NotifyRootUser(dto.NotifyTypeChannelTest, "通道测试完成", "所有通道测试已完成")
-			service.NotifyRootUser(dto.NotifyTypeChannelTest, "channel test completed", "all channel tests have been completed")
+			service.NotifyRootUser(dto.NotifyTypeChannelTest, common.LanguageString("channel test completed", "通道测试完成"), common.LanguageString("all channel tests have been completed", "所有通道测试已完成"))
 		}
 	})
 	return nil

@@ -114,15 +114,13 @@ func GetAllChannels(c *gin.Context) {
 		tags, err := model.GetPaginatedChannelTags(buildChannelListQuery(groupFilter, statusFilter, typeFilter), pageInfo.GetStartIdx(), pageInfo.GetPageSize())
 		if err != nil {
 			common.SysError("failed to get paginated tags: " + err.Error())
-			// c.JSON(http.StatusOK, gin.H{"success": false, "message": "获取标签失败，请稍后重试"})
-		c.JSON(http.StatusOK, gin.H{"success": false, "message": "failed to get tags, please try again later"})
+		c.JSON(http.StatusOK, gin.H{"success": false, "message": common.LanguageString("failed to get tags, please try again later", "获取标签失败，请稍后重试")})
 			return
 		}
 		total, err = model.CountChannelTags(buildChannelListQuery(groupFilter, statusFilter, typeFilter))
 		if err != nil {
 			common.SysError("failed to count tags: " + err.Error())
-			// c.JSON(http.StatusOK, gin.H{"success": false, "message": "获取标签数量失败，请稍后重试"})
-		c.JSON(http.StatusOK, gin.H{"success": false, "message": "failed to get tag count, please try again later"})
+		c.JSON(http.StatusOK, gin.H{"success": false, "message": common.LanguageString("failed to get tag count, please try again later", "获取标签数量失败，请稍后重试")})
 			return
 		}
 		for _, tag := range tags {
@@ -135,8 +133,7 @@ func GetAllChannels(c *gin.Context) {
 				Find(&tagChannels).Error
 			if err != nil {
 				common.SysError("failed to get channels by tag: " + err.Error())
-				// c.JSON(http.StatusOK, gin.H{"success": false, "message": "获取标签渠道失败，请稍后重试"})
-			c.JSON(http.StatusOK, gin.H{"success": false, "message": "failed to get tag channels, please try again later"})
+			c.JSON(http.StatusOK, gin.H{"success": false, "message": common.LanguageString("failed to get tag channels, please try again later", "获取标签渠道失败，请稍后重试")})
 				return
 			}
 			channelData = append(channelData, tagChannels...)
@@ -144,8 +141,7 @@ func GetAllChannels(c *gin.Context) {
 	} else {
 		if err := buildChannelListQuery(groupFilter, statusFilter, typeFilter).Count(&total).Error; err != nil {
 			common.SysError("failed to count channels: " + err.Error())
-			// c.JSON(http.StatusOK, gin.H{"success": false, "message": "获取渠道数量失败，请稍后重试"})
-		c.JSON(http.StatusOK, gin.H{"success": false, "message": "failed to get channel count, please try again later"})
+		c.JSON(http.StatusOK, gin.H{"success": false, "message": common.LanguageString("failed to get channel count, please try again later", "获取渠道数量失败，请稍后重试")})
 			return
 		}
 
@@ -156,8 +152,7 @@ func GetAllChannels(c *gin.Context) {
 			Find(&channelData).Error
 		if err != nil {
 			common.SysError("failed to get channels: " + err.Error())
-			// c.JSON(http.StatusOK, gin.H{"success": false, "message": "获取渠道列表失败，请稍后重试"})
-		c.JSON(http.StatusOK, gin.H{"success": false, "message": "failed to get channel list, please try again later"})
+		c.JSON(http.StatusOK, gin.H{"success": false, "message": common.LanguageString("failed to get channel list, please try again later", "获取渠道列表失败，请稍后重试")})
 			return
 		}
 	}
@@ -173,8 +168,7 @@ func GetAllChannels(c *gin.Context) {
 	}
 	if err := countQuery.Select("type, count(*) as count").Group("type").Find(&results).Error; err != nil {
 		common.SysError("failed to count channel types: " + err.Error())
-		// c.JSON(http.StatusOK, gin.H{"success": false, "message": "获取渠道类型统计失败，请稍后重试"})
-	c.JSON(http.StatusOK, gin.H{"success": false, "message": "failed to get channel type statistics, please try again later"})
+	c.JSON(http.StatusOK, gin.H{"success": false, "message": common.LanguageString("failed to get channel type statistics, please try again later", "获取渠道类型统计失败，请稍后重试")})
 		return
 	}
 	typeCounts := make(map[int64]int64)
@@ -235,8 +229,7 @@ func FetchUpstreamModels(c *gin.Context) {
 	if err != nil {
 		c.JSON(http.StatusOK, gin.H{
 			"success": false,
-			// "message": fmt.Sprintf("获取模型列表失败: %s", err.Error()),
-			"message": fmt.Sprintf("failed to get model list: %s", err.Error()),
+			"message": fmt.Sprintf(common.LanguageString("failed to get model list: %s", "获取模型列表失败: %s"), err.Error()),
 		})
 		return
 	}
@@ -414,34 +407,29 @@ func GetChannelKey(c *gin.Context) {
 	userId := c.GetInt("id")
 	channelId, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
-		// common.ApiError(c, fmt.Errorf("渠道ID格式错误: %v", err))
-		common.ApiError(c, fmt.Errorf("channel ID format error: %v", err))
+		common.ApiError(c, fmt.Errorf(common.LanguageString("channel ID format error: %v", "渠道ID格式错误: %v"), err))
 		return
 	}
 
 	// 获取渠道信息（包含密钥）
 	channel, err := model.GetChannelById(channelId, true)
 	if err != nil {
-		// common.ApiError(c, fmt.Errorf("获取渠道信息失败: %v", err))
-		common.ApiError(c, fmt.Errorf("failed to get channel info: %v", err))
+		common.ApiError(c, fmt.Errorf(common.LanguageString("failed to get channel info: %v", "获取渠道信息失败: %v"), err))
 		return
 	}
 
 	if channel == nil {
-		// common.ApiError(c, fmt.Errorf("渠道不存在"))
-		common.ApiError(c, fmt.Errorf("channel does not exist"))
+		common.ApiError(c, fmt.Errorf(common.LanguageString("channel does not exist", "渠道不存在")))
 		return
 	}
 
 	// 记录操作日志
-	// model.RecordLog(userId, model.LogTypeSystem, fmt.Sprintf("查看渠道密钥信息 (渠道ID: %d)", channelId))
-	model.RecordLog(userId, model.LogTypeSystem, fmt.Sprintf("viewed channel key info (channel ID: %d)", channelId))
+	model.RecordLog(userId, model.LogTypeSystem, fmt.Sprintf(common.LanguageString("viewed channel key info (channel ID: %d)", "查看渠道密钥信息 (渠道ID: %d)"), channelId))
 
 	// 返回渠道密钥
 	c.JSON(http.StatusOK, gin.H{
 		"success": true,
-		// "message": "获取成功",
-		"message": "retrieved successfully",
+		"message": common.LanguageString("retrieved successfully", "获取成功"),
 		"data": map[string]interface{}{
 			"key": channel.Key,
 		},
@@ -469,8 +457,7 @@ func validateTwoFactorAuth(twoFA *model.TwoFA, code string) bool {
 func validateChannel(channel *model.Channel, isAdd bool) error {
 	// 校验 channel settings
 	if err := channel.ValidateSettings(); err != nil {
-		// return fmt.Errorf("渠道额外设置[channel setting] 格式错误：%s", err.Error())
-		return fmt.Errorf("channel extra settings [channel setting] format error: %s", err.Error())
+		return fmt.Errorf(common.LanguageString("channel extra settings [channel setting] format error: %s", "渠道额外设置[channel setting] 格式错误：%s"), err.Error())
 	}
 
 	// 如果是添加操作，检查 channel 和 key 是否为空
@@ -482,8 +469,7 @@ func validateChannel(channel *model.Channel, isAdd bool) error {
 		// 检查模型名称长度是否超过 255
 		for _, m := range channel.GetModels() {
 			if len(m) > 255 {
-				// return fmt.Errorf("模型名称过长: %s", m)
-				return fmt.Errorf("model name too long: %s", m)
+				return fmt.Errorf(common.LanguageString("model name too long: %s", "模型名称过长: %s"), m)
 			}
 		}
 	}
@@ -491,8 +477,7 @@ func validateChannel(channel *model.Channel, isAdd bool) error {
 	// VertexAI 特殊校验
 	if channel.Type == constant.ChannelTypeVertexAi {
 		if channel.Other == "" {
-			// return fmt.Errorf("部署地区不能为空")
-			return fmt.Errorf("deployment region cannot be empty")
+			return fmt.Errorf(common.LanguageString("deployment region cannot be empty", "部署地区不能为空"))
 		}
 
 		regionMap, err := common.StrToMap(channel.Other)

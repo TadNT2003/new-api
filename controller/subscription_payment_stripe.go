@@ -27,8 +27,7 @@ func SubscriptionRequestStripePay(c *gin.Context) {
 
 	var req SubscriptionStripePayRequest
 	if err := c.ShouldBindJSON(&req); err != nil || req.PlanId <= 0 {
-		// common.ApiErrorMsg(c, "参数错误")
-	common.ApiErrorMsg(c, "parameter error")
+		common.ApiErrorMsg(c, common.LanguageString("parameter error", "参数错误"))
 		return
 	}
 
@@ -38,23 +37,19 @@ func SubscriptionRequestStripePay(c *gin.Context) {
 		return
 	}
 	if !plan.Enabled {
-		// common.ApiErrorMsg(c, "套餐未启用")
-	common.ApiErrorMsg(c, "plan is not enabled")
+		common.ApiErrorMsg(c, common.LanguageString("plan is not enabled", "套餐未启用"))
 		return
 	}
 	if plan.StripePriceId == "" {
-		// common.ApiErrorMsg(c, "该套餐未配置 StripePriceId")
-	common.ApiErrorMsg(c, "StripePriceId is not configured for this plan")
+		common.ApiErrorMsg(c, common.LanguageString("StripePriceId is not configured for this plan", "该套餐未配置 StripePriceId"))
 		return
 	}
 	if !strings.HasPrefix(setting.StripeApiSecret, "sk_") && !strings.HasPrefix(setting.StripeApiSecret, "rk_") {
-		// common.ApiErrorMsg(c, "Stripe 未配置或密钥无效")
-	common.ApiErrorMsg(c, "Stripe is not configured or the key is invalid")
+		common.ApiErrorMsg(c, common.LanguageString("Stripe is not configured or the key is invalid", "Stripe 未配置或密钥无效"))
 		return
 	}
 	if setting.StripeWebhookSecret == "" {
-		// common.ApiErrorMsg(c, "Stripe Webhook 未配置")
-	common.ApiErrorMsg(c, "Stripe Webhook is not configured")
+		common.ApiErrorMsg(c, common.LanguageString("Stripe Webhook is not configured", "Stripe Webhook 未配置"))
 		return
 	}
 
@@ -65,8 +60,7 @@ func SubscriptionRequestStripePay(c *gin.Context) {
 		return
 	}
 	if user == nil {
-		// common.ApiErrorMsg(c, "用户不存在")
-	common.ApiErrorMsg(c, "user does not exist")
+		common.ApiErrorMsg(c, common.LanguageString("user does not exist", "用户不存在"))
 		return
 	}
 
@@ -77,8 +71,7 @@ func SubscriptionRequestStripePay(c *gin.Context) {
 			return
 		}
 		if count >= int64(plan.MaxPurchasePerUser) {
-			// common.ApiErrorMsg(c, "已达到该套餐购买上限")
-		common.ApiErrorMsg(c, "purchase limit for this plan has been reached")
+			common.ApiErrorMsg(c, common.LanguageString("purchase limit for this plan has been reached", "已达到该套餐购买上限"))
 			return
 		}
 	}
@@ -88,10 +81,8 @@ func SubscriptionRequestStripePay(c *gin.Context) {
 
 	payLink, err := genStripeSubscriptionLink(referenceId, user.StripeCustomer, user.Email, plan.StripePriceId)
 	if err != nil {
-		// logger.LogError(c.Request.Context(), fmt.Sprintf("Stripe 订阅支付链接创建失败 trade_no=%s plan_id=%d error=%q", referenceId, plan.Id, err.Error()))
-		logger.LogError(c.Request.Context(), fmt.Sprintf("Stripe subscription payment link creation failed trade_no=%s plan_id=%d error=%q", referenceId, plan.Id, err.Error()))
-		// c.JSON(http.StatusOK, gin.H{"message": "error", "data": "拉起支付失败"})
-	c.JSON(http.StatusOK, gin.H{"message": "error", "data": "failed to initiate payment"})
+		logger.LogError(c.Request.Context(), fmt.Sprintf(common.LanguageString("Stripe subscription payment link creation failed trade_no=%s plan_id=%d error=%q", "Stripe 订阅支付链接创建失败 trade_no=%s plan_id=%d error=%q"), referenceId, plan.Id, err.Error()))
+		c.JSON(http.StatusOK, gin.H{"message": "error", "data": common.LanguageString("failed to initiate payment", "拉起支付失败")})
 		return
 	}
 
@@ -106,8 +97,7 @@ func SubscriptionRequestStripePay(c *gin.Context) {
 		Status:          common.TopUpStatusPending,
 	}
 	if err := order.Insert(); err != nil {
-		// c.JSON(http.StatusOK, gin.H{"message": "error", "data": "创建订单失败"})
-	c.JSON(http.StatusOK, gin.H{"message": "error", "data": "failed to create order"})
+		c.JSON(http.StatusOK, gin.H{"message": "error", "data": common.LanguageString("failed to create order", "创建订单失败")})
 		return
 	}
 

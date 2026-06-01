@@ -49,10 +49,8 @@ func sweepTimedOutTasks(ctx context.Context) {
 	}
 
 	const legacyTaskCutoff int64 = 1740182400 // 2026-02-22 00:00:00 UTC
-	// reason := fmt.Sprintf("任务超时（%d分钟）", constant.TaskTimeoutMinutes)
-	reason := fmt.Sprintf("task timeout (%d minutes)", constant.TaskTimeoutMinutes)
-	// legacyReason := "任务超时（旧系统遗留任务，不进行退款，请联系管理员）"
-	legacyReason := "task timeout (legacy task from old system, no refund, please contact administrator)"
+	reason := fmt.Sprintf(common.LanguageString("task timeout (%d minutes)", "任务超时（%d分钟）"), constant.TaskTimeoutMinutes)
+	legacyReason := common.LanguageString("task timeout (legacy task from old system, no refund, please contact administrator)", "任务超时（旧系统遗留任务，不进行退款，请联系管理员）")
 	now := time.Now().Unix()
 	timedOutCount := 0
 
@@ -93,8 +91,7 @@ func sweepTimedOutTasks(ctx context.Context) {
 func TaskPollingLoop() {
 	for {
 		time.Sleep(time.Duration(15) * time.Second)
-		// zh: 任务进度轮询开始
-		common.SysLog("task progress polling started")
+		common.SysLog(common.LanguageString("task progress polling started", "任务进度轮询开始"))
 		ctx := context.TODO()
 		sweepTimedOutTasks(ctx)
 		allTasks := model.GetAllUnFinishSyncTasks(constant.TaskQueryLimit)
@@ -136,8 +133,7 @@ func TaskPollingLoop() {
 
 			DispatchPlatformUpdate(platform, taskChannelM, taskM)
 		}
-		// zh: 任务进度轮询完成
-		common.SysLog("task progress polling completed")
+		common.SysLog(common.LanguageString("task progress polling completed", "任务进度轮询完成"))
 	}
 }
 
@@ -160,16 +156,14 @@ func UpdateSunoTasks(ctx context.Context, taskChannelM map[int][]string, taskM m
 	for channelId, taskIds := range taskChannelM {
 		err := updateSunoTasks(ctx, channelId, taskIds, taskM)
 		if err != nil {
-			// zh: 渠道 #%d 更新异步任务失败: %s
-			logger.LogError(ctx, fmt.Sprintf("channel #%d failed to update async task: %s", channelId, err.Error()))
+			logger.LogError(ctx, fmt.Sprintf(common.LanguageString("channel #%d failed to update async task: %s", "渠道 #%d 更新异步任务失败: %s"), channelId, err.Error()))
 		}
 	}
 	return nil
 }
 
 func updateSunoTasks(ctx context.Context, channelId int, taskIds []string, taskM map[string]*model.Task) error {
-	// zh: 渠道 #%d 未完成的任务有: %d
-	logger.LogInfo(ctx, fmt.Sprintf("channel #%d has %d unfinished tasks", channelId, len(taskIds)))
+	logger.LogInfo(ctx, fmt.Sprintf(common.LanguageString("channel #%d has %d unfinished tasks", "渠道 #%d 未完成的任务有: %d"), channelId, len(taskIds)))
 	if len(taskIds) == 0 {
 		return nil
 	}
@@ -184,8 +178,7 @@ func updateSunoTasks(ctx context.Context, channelId int, taskIds []string, taskM
 			}
 		}
 		err = model.TaskBulkUpdateByID(failedIDs, map[string]any{
-			// "fail_reason": fmt.Sprintf("获取渠道信息失败，请联系管理员，渠道ID：%d", channelId),
-			"fail_reason": fmt.Sprintf("failed to get channel info, please contact administrator, channel ID: %d", channelId),
+			"fail_reason": fmt.Sprintf(common.LanguageString("failed to get channel info, please contact administrator, channel ID: %d", "获取渠道信息失败，请联系管理员，渠道ID：%d"), channelId),
 			"status":      "FAILURE",
 			"progress":    "100%",
 		})
@@ -223,8 +216,7 @@ func updateSunoTasks(ctx context.Context, channelId int, taskIds []string, taskM
 		return err
 	}
 	if !responseItems.IsSuccess() {
-		// zh: 渠道 #%d 未完成的任务有: %d, 成功获取到任务数: %s
-		common.SysLog(fmt.Sprintf("channel #%d unfinished tasks: %d, successfully retrieved tasks: %s", channelId, len(taskIds), string(responseBody)))
+		common.SysLog(fmt.Sprintf(common.LanguageString("channel #%d unfinished tasks: %d, successfully retrieved tasks: %s", "渠道 #%d 未完成的任务有: %d, 成功获取到任务数: %s"), channelId, len(taskIds), string(responseBody)))
 		return err
 	}
 
@@ -240,8 +232,7 @@ func updateSunoTasks(ctx context.Context, channelId int, taskIds []string, taskM
 		task.StartTime = lo.If(responseItem.StartTime != 0, responseItem.StartTime).Else(task.StartTime)
 		task.FinishTime = lo.If(responseItem.FinishTime != 0, responseItem.FinishTime).Else(task.FinishTime)
 		if responseItem.FailReason != "" || task.Status == model.TaskStatusFailure {
-			// zh: task.TaskID+" 构建失败，"+task.FailReason
-			logger.LogInfo(ctx, task.TaskID+" build failed: "+task.FailReason)
+			logger.LogInfo(ctx, task.TaskID+common.LanguageString(" build failed: ", " 构建失败，")+task.FailReason)
 			task.Progress = "100%"
 			RefundTaskQuota(ctx, task, task.FailReason)
 		}
@@ -552,14 +543,12 @@ func truncateBase64(s string) string {
 func settleTaskBillingOnComplete(ctx context.Context, adaptor TaskPollingAdaptor, task *model.Task, taskResult *relaycommon.TaskInfo) {
 	// 0. 按次计费的任务不做差额结算
 	if bc := task.PrivateData.BillingContext; bc != nil && bc.PerCallBilling {
-		// zh: 任务 %s 按次计费，跳过差额结算
-		logger.LogInfo(ctx, fmt.Sprintf("task %s billed per-request, skipping settlement", task.TaskID))
+		logger.LogInfo(ctx, fmt.Sprintf(common.LanguageString("task %s billed per-request, skipping settlement", "任务 %s 按次计费，跳过差额结算"), task.TaskID))
 		return
 	}
 	// 1. 优先让 adaptor 决定最终额度
 	if actualQuota := adaptor.AdjustBillingOnComplete(task, taskResult); actualQuota > 0 {
-		// RecalculateTaskQuota(ctx, task, actualQuota, "adaptor计费调整")
-		RecalculateTaskQuota(ctx, task, actualQuota, "adaptor billing adjustment")
+		RecalculateTaskQuota(ctx, task, actualQuota, common.LanguageString("adaptor billing adjustment", "adaptor计费调整"))
 		return
 	}
 	// 2. 回退到 token 重算

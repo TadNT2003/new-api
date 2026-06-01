@@ -16,8 +16,7 @@ import (
 func GetCheckinStatus(c *gin.Context) {
 	setting := operation_setting.GetCheckinSetting()
 	if !setting.Enabled {
-		// common.ApiErrorMsg(c, "签到功能未启用")
-	common.ApiErrorMsg(c, "check-in feature is not enabled")
+		common.ApiErrorMsg(c, common.LanguageString("check-in feature is not enabled", "签到功能未启用"))
 		return
 	}
 	userId := c.GetInt("id")
@@ -48,8 +47,7 @@ func GetCheckinStatus(c *gin.Context) {
 func DoCheckin(c *gin.Context) {
 	setting := operation_setting.GetCheckinSetting()
 	if !setting.Enabled {
-		// common.ApiErrorMsg(c, "签到功能未启用")
-	common.ApiErrorMsg(c, "check-in feature is not enabled")
+		common.ApiErrorMsg(c, common.LanguageString("check-in feature is not enabled", "签到功能未启用"))
 		return
 	}
 
@@ -63,12 +61,10 @@ func DoCheckin(c *gin.Context) {
 		})
 		return
 	}
-	// model.RecordLog(userId, model.LogTypeSystem, fmt.Sprintf("用户签到，获得额度 %s", logger.LogQuota(checkin.QuotaAwarded)))
-	model.RecordLog(userId, model.LogTypeSystem, fmt.Sprintf("user checked in, quota awarded %s", logger.LogQuota(checkin.QuotaAwarded)))
+	model.RecordLog(userId, model.LogTypeSystem, fmt.Sprintf(common.LanguageString("user checked in, quota awarded %s", "用户签到，获得额度 %s"), logger.LogQuota(checkin.QuotaAwarded)))
 	c.JSON(http.StatusOK, gin.H{
 		"success": true,
-		// "message": "签到成功",
-		"message": "check-in successful",
+		"message": common.LanguageString("check-in successful", "签到成功"),
 		"data": gin.H{
 			"quota_awarded": checkin.QuotaAwarded,
 			"checkin_date":  checkin.CheckinDate},

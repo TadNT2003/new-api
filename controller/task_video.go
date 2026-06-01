@@ -196,16 +196,14 @@ func updateVideoSingleTask(ctx context.Context, adaptor channel.TaskAdaptor, cha
 								taskResult.TotalTokens,
 							))
 								if err := model.DecreaseUserQuota(task.UserId, quotaDelta, false); err != nil {
-									// logger.LogError(ctx, fmt.Sprintf("补扣费失败: %s", err.Error()))
-									logger.LogError(ctx, fmt.Sprintf("additional deduction failed: %s", err.Error()))
+									logger.LogError(ctx, fmt.Sprintf(common.LanguageString("additional deduction failed: %s", "补扣费失败: %s"), err.Error()))
 								} else {
 									model.UpdateUserUsedQuotaAndRequestCount(task.UserId, quotaDelta)
 									model.UpdateChannelUsedQuota(task.ChannelId, quotaDelta)
 									task.Quota = actualQuota // 更新任务记录的实际扣费额度
 
 									// 记录消费日志
-									// logContent := fmt.Sprintf("视频任务成功补扣费，模型倍率 %.2f，分组倍率 %.2f，tokens %d，预扣费 %s，实际扣费 %s，补扣费 %s",
-									logContent := fmt.Sprintf("video task post-deduction successful, model ratio %.2f, group ratio %.2f, tokens %d, pre-deducted %s, actual deduction %s, additional deduction %s",
+									logContent := fmt.Sprintf(common.LanguageString("video task post-deduction successful, model ratio %.2f, group ratio %.2f, tokens %d, pre-deducted %s, actual deduction %s, additional deduction %s", "视频任务成功补扣费，模型倍率 %.2f，分组倍率 %.2f，tokens %d，预扣费 %s，实际扣费 %s，补扣费 %s"),
 										modelRatio, finalGroupRatio, taskResult.TotalTokens,
 										logger.LogQuota(preConsumedQuota), logger.LogQuota(actualQuota), logger.LogQuota(quotaDelta))
 									model.RecordLog(task.UserId, model.LogTypeSystem, logContent)
@@ -222,14 +220,12 @@ func updateVideoSingleTask(ctx context.Context, adaptor channel.TaskAdaptor, cha
 								taskResult.TotalTokens,
 							))
 								if err := model.IncreaseUserQuota(task.UserId, refundQuota, false); err != nil {
-									// logger.LogError(ctx, fmt.Sprintf("退还预扣费失败: %s", err.Error()))
-									logger.LogError(ctx, fmt.Sprintf("failed to refund pre-deduction: %s", err.Error()))
+									logger.LogError(ctx, fmt.Sprintf(common.LanguageString("failed to refund pre-deduction: %s", "退还预扣费失败: %s"), err.Error()))
 								} else {
 									task.Quota = actualQuota // 更新任务记录的实际扣费额度
 
 									// 记录退款日志
-									// logContent := fmt.Sprintf("视频任务成功退还多扣费用，模型倍率 %.2f，分组倍率 %.2f，tokens %d，预扣费 %s，实际扣费 %s，退还 %s",
-									logContent := fmt.Sprintf("video task refund successful, model ratio %.2f, group ratio %.2f, tokens %d, pre-deducted %s, actual deduction %s, refunded %s",
+									logContent := fmt.Sprintf(common.LanguageString("video task refund successful, model ratio %.2f, group ratio %.2f, tokens %d, pre-deducted %s, actual deduction %s, refunded %s", "视频任务成功退还多扣费用，模型倍率 %.2f，分组倍率 %.2f，tokens %d，预扣费 %s，实际扣费 %s，退还 %s"),
 										modelRatio, finalGroupRatio, taskResult.TotalTokens,
 										logger.LogQuota(preConsumedQuota), logger.LogQuota(actualQuota), logger.LogQuota(refundQuota))
 									model.RecordLog(task.UserId, model.LogTypeSystem, logContent)

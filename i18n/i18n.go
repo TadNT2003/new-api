@@ -126,10 +126,10 @@ func SetUserLangLoader(loader func(userId int) string) {
 // 1. User settings (ContextKeyUserSetting) - if already loaded (e.g., by TokenAuth)
 // 2. Lazy load user language from cache/DB using user ID
 // 3. Language set by middleware (ContextKeyLanguage) - from Accept-Language header
-// 4. Default language (English)
+// 4. Default language (BACKEND_LANGUAGE env var, defaults to English)
 func GetLangFromContext(c *gin.Context) string {
 	if c == nil {
-		return DefaultLang
+		return common.BackendLanguage
 	}
 
 	// 1. Try to get language from user settings (if already loaded by TokenAuth or other middleware)
@@ -173,7 +173,7 @@ func GetLangFromContext(c *gin.Context) string {
 		}
 	}
 
-	return DefaultLang
+	return common.BackendLanguage
 }
 
 // ParseAcceptLanguage parses the Accept-Language header and returns the preferred language
@@ -210,7 +210,7 @@ func normalizeLang(lang string) string {
 	case strings.HasPrefix(lang, "en"):
 		return LangEn
 	default:
-		return DefaultLang
+		return common.BackendLanguage
 	}
 }
 

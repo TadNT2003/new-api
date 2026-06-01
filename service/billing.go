@@ -3,6 +3,7 @@ package service
 import (
 	"fmt"
 
+	"github.com/QuantumNous/new-api/common"
 	"github.com/QuantumNous/new-api/logger"
 	relaycommon "github.com/QuantumNous/new-api/relay/common"
 	"github.com/QuantumNous/new-api/types"
@@ -37,22 +38,19 @@ func SettleBilling(ctx *gin.Context, relayInfo *relaycommon.RelayInfo, actualQuo
 		delta := actualQuota - preConsumed
 
 		if delta > 0 {
-			// zh: 预扣费后补扣费：%s（实际消耗：%s，预扣费：%s）
-			logger.LogInfo(ctx, fmt.Sprintf("post-deduction adjustment: %s (actual: %s, pre-deducted: %s)",
+			logger.LogInfo(ctx, fmt.Sprintf(common.LanguageString("post-deduction adjustment: %s (actual: %s, pre-deducted: %s)", "预扣费后补扣费：%s（实际消耗：%s，预扣费：%s）"),
 				logger.FormatQuota(delta),
 				logger.FormatQuota(actualQuota),
 				logger.FormatQuota(preConsumed),
 			))
 		} else if delta < 0 {
-			// zh: 预扣费后返还扣费：%s（实际消耗：%s，预扣费：%s）
-			logger.LogInfo(ctx, fmt.Sprintf("pre-deduction refund: %s (actual: %s, pre-deducted: %s)",
+			logger.LogInfo(ctx, fmt.Sprintf(common.LanguageString("pre-deduction refund: %s (actual: %s, pre-deducted: %s)", "预扣费后返还扣费：%s（实际消耗：%s，预扣费：%s）"),
 				logger.FormatQuota(-delta),
 				logger.FormatQuota(actualQuota),
 				logger.FormatQuota(preConsumed),
 			))
 		} else {
-			// zh: 预扣费与实际消耗一致，无需调整：%s（按次计费）
-			logger.LogInfo(ctx, fmt.Sprintf("pre-deduction matches actual consumption, no adjustment needed: %s (per-request billing)",
+			logger.LogInfo(ctx, fmt.Sprintf(common.LanguageString("pre-deduction matches actual consumption, no adjustment needed: %s (per-request billing)", "预扣费与实际消耗一致，无需调整：%s（按次计费）"),
 				logger.FormatQuota(actualQuota),
 			))
 		}

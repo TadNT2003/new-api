@@ -59,8 +59,7 @@ func GetUserLogs(c *gin.Context) {
 func SearchAllLogs(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{
 		"success": false,
-		// "message": "该接口已废弃",
-		"message": "this API is deprecated",
+		"message": common.LanguageString("this API is deprecated", "该接口已废弃"),
 	})
 }
 
@@ -68,8 +67,7 @@ func SearchAllLogs(c *gin.Context) {
 func SearchUserLogs(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{
 		"success": false,
-		// "message": "该接口已废弃",
-		"message": "this API is deprecated",
+		"message": common.LanguageString("this API is deprecated", "该接口已废弃"),
 	})
 }
 
@@ -78,8 +76,7 @@ func GetLogByKey(c *gin.Context) {
 	if tokenId == 0 {
 		c.JSON(200, gin.H{
 			"success": false,
-			// "message": "无效的令牌",
-		"message": "invalid token",
+			"message": common.LanguageString("invalid token", "无效的令牌"),
 		})
 		return
 	}

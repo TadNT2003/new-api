@@ -148,16 +148,13 @@ func ImageHelper(c *gin.Context, info *relaycommon.RelayInfo) (newAPIError *type
 	var logContent []string
 
 	if len(request.Size) > 0 {
-		// logContent = append(logContent, fmt.Sprintf("大小 %s", request.Size))
-		logContent = append(logContent, fmt.Sprintf("size %s", request.Size))
+		logContent = append(logContent, fmt.Sprintf(common.LanguageString("size %s", "大小 %s"), request.Size))
 	}
 	if len(quality) > 0 {
-		// logContent = append(logContent, fmt.Sprintf("品质 %s", quality))
-		logContent = append(logContent, fmt.Sprintf("quality %s", quality))
+		logContent = append(logContent, fmt.Sprintf(common.LanguageString("quality %s", "品质 %s"), quality))
 	}
 	if imageN > 0 {
-		// logContent = append(logContent, fmt.Sprintf("生成数量 %d", imageN))
-		logContent = append(logContent, fmt.Sprintf("count %d", imageN))
+		logContent = append(logContent, fmt.Sprintf(common.LanguageString("count %d", "生成数量 %d"), imageN))
 	}
 
 	service.PostTextConsumeQuota(c, info, usage.(*dto.Usage), logContent)

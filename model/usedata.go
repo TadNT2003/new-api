@@ -24,8 +24,7 @@ type QuotaData struct {
 func UpdateQuotaData() {
 	for {
 		if common.DataExportEnabled {
-			// common.SysLog("正在更新数据看板数据...")
-			common.SysLog("updating dashboard data...")
+			common.SysLog(common.LanguageString("updating dashboard data...", "正在更新数据看板数据..."))
 			SaveQuotaDataCache()
 		}
 		time.Sleep(time.Duration(common.DataExportInterval) * time.Minute)
@@ -87,8 +86,7 @@ func SaveQuotaDataCache() {
 		}
 	}
 	CacheQuotaData = make(map[string]*QuotaData)
-	// common.SysLog(fmt.Sprintf("保存数据看板数据成功，共保存%d条数据", size))
-	common.SysLog(fmt.Sprintf("dashboard data saved successfully, total %d records", size))
+	common.SysLog(fmt.Sprintf(common.LanguageString("dashboard data saved successfully, total %d records", "保存数据看板数据成功，共保存%d条数据"), size))
 }
 
 func increaseQuotaData(userId int, username string, modelName string, count int, quota int, createdAt int64, tokenUsed int) {

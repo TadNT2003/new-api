@@ -213,14 +213,12 @@ func ClearChannelAffinityCacheAll() int {
 func ClearChannelAffinityCacheByRuleName(ruleName string) (int, error) {
 	ruleName = strings.TrimSpace(ruleName)
 	if ruleName == "" {
-		// zh: rule_name 不能为空
-		return 0, fmt.Errorf("rule_name cannot be empty")
+		return 0, fmt.Errorf(common.LanguageString("rule_name cannot be empty", "rule_name 不能为空"))
 	}
 
 	setting := operation_setting.GetChannelAffinitySetting()
 	if setting == nil {
-		// zh: channel_affinity_setting 未初始化
-		return 0, fmt.Errorf("channel_affinity_setting is not initialized")
+		return 0, fmt.Errorf(common.LanguageString("channel_affinity_setting is not initialized", "channel_affinity_setting 未初始化"))
 	}
 
 	var matchedRule *operation_setting.ChannelAffinityRule
@@ -233,12 +231,10 @@ func ClearChannelAffinityCacheByRuleName(ruleName string) (int, error) {
 		break
 	}
 	if matchedRule == nil {
-		// zh: 未知规则名称
-		return 0, fmt.Errorf("unknown rule name")
+		return 0, fmt.Errorf(common.LanguageString("unknown rule name", "未知规则名称"))
 	}
 	if !matchedRule.IncludeRuleName {
-		// zh: 该规则未启用 include_rule_name，无法按规则清空缓存
-		return 0, fmt.Errorf("this rule does not have include_rule_name enabled, cannot clear cache by rule")
+		return 0, fmt.Errorf(common.LanguageString("this rule does not have include_rule_name enabled, cannot clear cache by rule", "该规则未启用 include_rule_name，无法按规则清空缓存"))
 	}
 
 	cache := getChannelAffinityCache()

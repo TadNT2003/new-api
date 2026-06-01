@@ -1683,8 +1683,7 @@ type GeminiModelsResponse struct {
 func FetchGeminiModels(baseURL, apiKey, proxyURL string) ([]string, error) {
 	client, err := service.GetHttpClientWithProxy(proxyURL)
 	if err != nil {
-		// return nil, fmt.Errorf("创建HTTP客户端失败: %v", err)
-		return nil, fmt.Errorf("failed to create HTTP client: %v", err)
+		return nil, fmt.Errorf(common.LanguageString("failed to create HTTP client: %v", "创建HTTP客户端失败: %v"), err)
 	}
 
 	allModels := make([]string, 0)
@@ -1701,8 +1700,7 @@ func FetchGeminiModels(baseURL, apiKey, proxyURL string) ([]string, error) {
 		request, err := http.NewRequestWithContext(ctx, "GET", url, nil)
 		if err != nil {
 			cancel()
-			// return nil, fmt.Errorf("创建请求失败: %v", err)
-			return nil, fmt.Errorf("failed to create request: %v", err)
+			return nil, fmt.Errorf(common.LanguageString("failed to create request: %v", "创建请求失败: %v"), err)
 		}
 
 		request.Header.Set("x-goog-api-key", apiKey)
@@ -1710,30 +1708,26 @@ func FetchGeminiModels(baseURL, apiKey, proxyURL string) ([]string, error) {
 		response, err := client.Do(request)
 		if err != nil {
 			cancel()
-			// return nil, fmt.Errorf("请求失败: %v", err)
-			return nil, fmt.Errorf("request failed: %v", err)
+			return nil, fmt.Errorf(common.LanguageString("request failed: %v", "请求失败: %v"), err)
 		}
 
 		if response.StatusCode != http.StatusOK {
 			body, _ := io.ReadAll(response.Body)
 			response.Body.Close()
 			cancel()
-			// return nil, fmt.Errorf("服务器返回错误 %d: %s", response.StatusCode, string(body))
-			return nil, fmt.Errorf("server returned error %d: %s", response.StatusCode, string(body))
+			return nil, fmt.Errorf(common.LanguageString("server returned error %d: %s", "服务器返回错误 %d: %s"), response.StatusCode, string(body))
 		}
 
 		body, err := io.ReadAll(response.Body)
 		response.Body.Close()
 		cancel()
 		if err != nil {
-			// return nil, fmt.Errorf("读取响应失败: %v", err)
-			return nil, fmt.Errorf("failed to read response: %v", err)
+			return nil, fmt.Errorf(common.LanguageString("failed to read response: %v", "读取响应失败: %v"), err)
 		}
 
 		var modelsResponse GeminiModelsResponse
 		if err = common.Unmarshal(body, &modelsResponse); err != nil {
-			// return nil, fmt.Errorf("解析响应失败: %v", err)
-			return nil, fmt.Errorf("failed to parse response: %v", err)
+			return nil, fmt.Errorf(common.LanguageString("failed to parse response: %v", "解析响应失败: %v"), err)
 		}
 
 		for _, model := range modelsResponse.Models {

@@ -455,8 +455,7 @@ func CreateUserSubscriptionFromPlanTx(tx *gorm.DB, userId int, plan *Subscriptio
 			return nil, err
 		}
 		if count >= int64(plan.MaxPurchasePerUser) {
-			// return nil, errors.New("已达到该套餐购买上限")
-			return nil, errors.New("purchase limit for this plan has been reached")
+			return nil, errors.New(common.LanguageString("purchase limit for this plan has been reached", "已达到该套餐购买上限"))
 		}
 	}
 	nowUnix := GetDBTimestamp()
@@ -577,8 +576,7 @@ func CompleteSubscriptionOrder(tradeNo string, providerPayload string, expectedP
 		_ = UpdateUserGroupCache(logUserId, upgradeGroup)
 	}
 	if logUserId > 0 {
-		// msg := fmt.Sprintf("订阅购买成功，套餐: %s，支付金额: %.2f，支付方式: %s", logPlanTitle, logMoney, logPaymentMethod)
-		msg := fmt.Sprintf("subscription purchased successfully, plan: %s, payment amount: %.2f, payment method: %s", logPlanTitle, logMoney, logPaymentMethod)
+			msg := fmt.Sprintf(common.LanguageString("subscription purchased successfully, plan: %s, payment amount: %.2f, payment method: %s", "订阅购买成功，套餐: %s，支付金额: %.2f，支付方式: %s"), logPlanTitle, logMoney, logPaymentMethod)
 		RecordLog(logUserId, LogTypeTopup, msg)
 	}
 	return nil
@@ -663,8 +661,7 @@ func AdminBindSubscription(userId int, planId int, sourceNote string) (string, e
 	}
 	if strings.TrimSpace(plan.UpgradeGroup) != "" {
 		_ = UpdateUserGroupCache(userId, plan.UpgradeGroup)
-		// return fmt.Sprintf("用户分组将升级到 %s", plan.UpgradeGroup), nil
-		return fmt.Sprintf("user group will be upgraded to %s", plan.UpgradeGroup), nil
+		return fmt.Sprintf(common.LanguageString("user group will be upgraded to %s", "用户分组将升级到 %s"), plan.UpgradeGroup), nil
 	}
 	return "", nil
 }
@@ -674,8 +671,7 @@ func calcSubscriptionBalanceQuota(priceAmount float64) (int, error) {
 		return 0, nil
 	}
 	if common.QuotaPerUnit <= 0 {
-		// return 0, errors.New("额度单位配置错误")
-		return 0, errors.New("quota unit configuration error")
+		return 0, errors.New(common.LanguageString("quota unit configuration error", "额度单位配置错误"))
 	}
 	quota := decimal.NewFromFloat(priceAmount).
 		Mul(decimal.NewFromFloat(common.QuotaPerUnit)).
@@ -700,12 +696,10 @@ func PurchaseSubscriptionWithBalance(userId int, planId int) error {
 			return err
 		}
 		if !plan.Enabled {
-			// return errors.New("套餐未启用")
-			return errors.New("plan is not enabled")
+			return errors.New(common.LanguageString("plan is not enabled", "套餐未启用"))
 		}
 		if plan.PriceAmount < 0 {
-			// return errors.New("套餐价格不能为负数")
-			return errors.New("plan price cannot be negative")
+			return errors.New(common.LanguageString("plan price cannot be negative", "套餐价格不能为负数"))
 		}
 
 		requiredQuota, err := calcSubscriptionBalanceQuota(plan.PriceAmount)

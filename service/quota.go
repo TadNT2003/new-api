@@ -389,8 +389,7 @@ func PostAudioConsumeQuota(ctx *gin.Context, relayInfo *relaycommon.RelayInfo, u
 
 func PreConsumeTokenQuota(relayInfo *relaycommon.RelayInfo, quota int) error {
 	if quota < 0 {
-		// zh: quota 不能为负数！
-		return errors.New("quota cannot be negative")
+		return errors.New(common.LanguageString("quota cannot be negative", "quota 不能为负数！"))
 	}
 	if relayInfo.IsPlayground {
 		return nil
@@ -473,8 +472,7 @@ func checkAndSendQuotaNotify(relayInfo *relaycommon.RelayInfo, quota int, preCon
 			quotaTooLow = true
 		}
 		if quotaTooLow {
-			// prompt := "您的额度即将用尽"
-			prompt := "Your quota is about to run out"
+			prompt := common.LanguageString("Your quota is about to run out", "您的额度即将用尽")
 			topUpLink := PaymentReturnURL("/console/topup")
 
 			// 根据通知方式生成不同的内容格式
@@ -488,12 +486,10 @@ func checkAndSendQuotaNotify(relayInfo *relaycommon.RelayInfo, quota int, preCon
 
 			if notifyType == dto.NotifyTypeBark {
 				// Bark推送使用简短文本，不支持HTML
-				// content = "{{value}}，剩余额度：{{value}}，请及时充值"
-				content = "{{value}}, remaining quota: {{value}}, please top up in time"
+				content = common.LanguageString("{{value}}, remaining quota: {{value}}, please top up in time", "{{value}}，剩余额度：{{value}}，请及时充值")
 				values = []interface{}{prompt, logger.FormatQuota(relayInfo.UserQuota)}
 			} else if notifyType == dto.NotifyTypeGotify {
-				// content = "{{value}}，当前剩余额度为 {{value}}，请及时充值。"
-				content = "{{value}}, current remaining quota: {{value}}, please top up in time."
+				content = common.LanguageString("{{value}}, current remaining quota: {{value}}, please top up in time.", "{{value}}，当前剩余额度为 {{value}}，请及时充值。")
 				values = []interface{}{prompt, logger.FormatQuota(relayInfo.UserQuota)}
 			} else {
 				// 默认内容格式，适用于Email和Webhook（支持HTML）

@@ -322,8 +322,7 @@ func usageSemanticFromUsage(relayInfo *relaycommon.RelayInfo, usage *dto.Usage) 
 func PostTextConsumeQuota(ctx *gin.Context, relayInfo *relaycommon.RelayInfo, usage *dto.Usage, extraContent []string) {
 	originUsage := usage
 	if usage == nil {
-		// extraContent = append(extraContent, "上游无计费信息")
-		extraContent = append(extraContent, "no billing info from upstream")
+		extraContent = append(extraContent, common.LanguageString("no billing info from upstream", "上游无计费信息"))
 	}
 	if originUsage != nil {
 		ObserveChannelAffinityUsageCacheByRelayFormat(ctx, usage, relayInfo.GetFinalRequestRelayFormat())
@@ -348,29 +347,23 @@ func PostTextConsumeQuota(ctx *gin.Context, relayInfo *relaycommon.RelayInfo, us
 	}
 
 	if summary.WebSearchCallCount > 0 {
-		// extraContent = append(extraContent, fmt.Sprintf("Web Search 调用 %d 次，调用花费 %s", summary.WebSearchCallCount, ...))
-		extraContent = append(extraContent, fmt.Sprintf("Web Search calls: %d, cost: %s", summary.WebSearchCallCount, decimal.NewFromFloat(summary.WebSearchPrice).Mul(decimal.NewFromInt(int64(summary.WebSearchCallCount))).Div(decimal.NewFromInt(1000)).Mul(decimal.NewFromFloat(summary.GroupRatio)).Mul(decimal.NewFromFloat(common.QuotaPerUnit)).String()))
+		extraContent = append(extraContent, fmt.Sprintf(common.LanguageString("Web Search calls: %d, cost: %s", "Web Search 调用 %d 次，调用花费 %s"), summary.WebSearchCallCount, decimal.NewFromFloat(summary.WebSearchPrice).Mul(decimal.NewFromInt(int64(summary.WebSearchCallCount))).Div(decimal.NewFromInt(1000)).Mul(decimal.NewFromFloat(summary.GroupRatio)).Mul(decimal.NewFromFloat(common.QuotaPerUnit)).String()))
 	}
 	if summary.ClaudeWebSearchCallCount > 0 {
-		// extraContent = append(extraContent, fmt.Sprintf("Claude Web Search 调用 %d 次，调用花费 %s", summary.ClaudeWebSearchCallCount, ...))
-		extraContent = append(extraContent, fmt.Sprintf("Claude Web Search calls: %d, cost: %s", summary.ClaudeWebSearchCallCount, decimal.NewFromFloat(summary.ClaudeWebSearchPrice).Div(decimal.NewFromInt(1000)).Mul(decimal.NewFromFloat(summary.GroupRatio)).Mul(decimal.NewFromFloat(common.QuotaPerUnit)).Mul(decimal.NewFromInt(int64(summary.ClaudeWebSearchCallCount))).String()))
+		extraContent = append(extraContent, fmt.Sprintf(common.LanguageString("Claude Web Search calls: %d, cost: %s", "Claude Web Search 调用 %d 次，调用花费 %s"), summary.ClaudeWebSearchCallCount, decimal.NewFromFloat(summary.ClaudeWebSearchPrice).Div(decimal.NewFromInt(1000)).Mul(decimal.NewFromFloat(summary.GroupRatio)).Mul(decimal.NewFromFloat(common.QuotaPerUnit)).Mul(decimal.NewFromInt(int64(summary.ClaudeWebSearchCallCount))).String()))
 	}
 	if summary.FileSearchCallCount > 0 {
-		// extraContent = append(extraContent, fmt.Sprintf("File Search 调用 %d 次，调用花费 %s", summary.FileSearchCallCount, ...))
-		extraContent = append(extraContent, fmt.Sprintf("File Search calls: %d, cost: %s", summary.FileSearchCallCount, decimal.NewFromFloat(summary.FileSearchPrice).Mul(decimal.NewFromInt(int64(summary.FileSearchCallCount))).Div(decimal.NewFromInt(1000)).Mul(decimal.NewFromFloat(summary.GroupRatio)).Mul(decimal.NewFromFloat(common.QuotaPerUnit)).String()))
+		extraContent = append(extraContent, fmt.Sprintf(common.LanguageString("File Search calls: %d, cost: %s", "File Search 调用 %d 次，调用花费 %s"), summary.FileSearchCallCount, decimal.NewFromFloat(summary.FileSearchPrice).Mul(decimal.NewFromInt(int64(summary.FileSearchCallCount))).Div(decimal.NewFromInt(1000)).Mul(decimal.NewFromFloat(summary.GroupRatio)).Mul(decimal.NewFromFloat(common.QuotaPerUnit)).String()))
 	}
 	if summary.AudioInputPrice > 0 && summary.AudioTokens > 0 {
-		// extraContent = append(extraContent, fmt.Sprintf("Audio Input 花费 %s", ...))
-		extraContent = append(extraContent, fmt.Sprintf("Audio Input cost: %s", decimal.NewFromFloat(summary.AudioInputPrice).Div(decimal.NewFromInt(1000000)).Mul(decimal.NewFromInt(int64(summary.AudioTokens))).Mul(decimal.NewFromFloat(summary.GroupRatio)).Mul(decimal.NewFromFloat(common.QuotaPerUnit)).String()))
+		extraContent = append(extraContent, fmt.Sprintf(common.LanguageString("Audio Input cost: %s", "Audio Input 花费 %s"), decimal.NewFromFloat(summary.AudioInputPrice).Div(decimal.NewFromInt(1000000)).Mul(decimal.NewFromInt(int64(summary.AudioTokens))).Mul(decimal.NewFromFloat(summary.GroupRatio)).Mul(decimal.NewFromFloat(common.QuotaPerUnit)).String()))
 	}
 	if summary.ImageGenerationCallPrice > 0 {
-		// extraContent = append(extraContent, fmt.Sprintf("Image Generation Call 花费 %s", ...))
-		extraContent = append(extraContent, fmt.Sprintf("Image Generation Call cost: %s", decimal.NewFromFloat(summary.ImageGenerationCallPrice).Mul(decimal.NewFromFloat(summary.GroupRatio)).Mul(decimal.NewFromFloat(common.QuotaPerUnit)).String()))
+		extraContent = append(extraContent, fmt.Sprintf(common.LanguageString("Image Generation Call cost: %s", "Image Generation Call 花费 %s"), decimal.NewFromFloat(summary.ImageGenerationCallPrice).Mul(decimal.NewFromFloat(summary.GroupRatio)).Mul(decimal.NewFromFloat(common.QuotaPerUnit)).String()))
 	}
 
 	if summary.TotalTokens == 0 {
-		// extraContent = append(extraContent, "上游没有返回计费信息，无法扣费（可能是上游超时）")
-		extraContent = append(extraContent, "upstream returned no billing info, cannot deduct quota (possibly upstream timeout)")
+		extraContent = append(extraContent, common.LanguageString("upstream returned no billing info, cannot deduct quota (possibly upstream timeout)", "上游没有返回计费信息，无法扣费（可能是上游超时）"))
 		logger.LogError(ctx, fmt.Sprintf("total tokens is 0, cannot consume quota, userId %d, channelId %d, tokenId %d, model %s, pre-consumed quota %d", relayInfo.UserId, relayInfo.ChannelId, relayInfo.TokenId, summary.ModelName, relayInfo.FinalPreConsumedQuota))
 	} else {
 		model.UpdateUserUsedQuotaAndRequestCount(relayInfo.UserId, summary.Quota)
@@ -384,13 +377,11 @@ func PostTextConsumeQuota(ctx *gin.Context, relayInfo *relaycommon.RelayInfo, us
 	logModel := summary.ModelName
 	if strings.HasPrefix(logModel, "gpt-4-gizmo") {
 		logModel = "gpt-4-gizmo-*"
-		// extraContent = append(extraContent, fmt.Sprintf("模型 %s", summary.ModelName))
-		extraContent = append(extraContent, fmt.Sprintf("model %s", summary.ModelName))
+		extraContent = append(extraContent, fmt.Sprintf(common.LanguageString("model %s", "模型 %s"), summary.ModelName))
 	}
 	if strings.HasPrefix(logModel, "gpt-4o-gizmo") {
 		logModel = "gpt-4o-gizmo-*"
-		// extraContent = append(extraContent, fmt.Sprintf("模型 %s", summary.ModelName))
-		extraContent = append(extraContent, fmt.Sprintf("model %s", summary.ModelName))
+		extraContent = append(extraContent, fmt.Sprintf(common.LanguageString("model %s", "模型 %s"), summary.ModelName))
 	}
 
 	logContent := strings.Join(extraContent, ", ")

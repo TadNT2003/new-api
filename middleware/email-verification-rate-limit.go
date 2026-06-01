@@ -49,8 +49,7 @@ func redisEmailVerificationRateLimiter(c *gin.Context) {
 
 	c.JSON(http.StatusTooManyRequests, gin.H{
 		"success": false,
-		// "message": fmt.Sprintf("发送过于频繁，请等待 %d 秒后再试", waitSeconds),
-		"message": fmt.Sprintf("sending too frequently, please wait %d seconds before retrying", waitSeconds),
+		"message": fmt.Sprintf(common.LanguageString("sending too frequently, please wait %d seconds before retrying", "发送过于频繁，请等待 %d 秒后再试"), waitSeconds),
 	})
 	c.Abort()
 }
@@ -61,8 +60,7 @@ func memoryEmailVerificationRateLimiter(c *gin.Context) {
 	if !inMemoryRateLimiter.Request(key, EmailVerificationMaxRequests, EmailVerificationDuration) {
 		c.JSON(http.StatusTooManyRequests, gin.H{
 			"success": false,
-			// "message": "发送过于频繁，请稍后再试",
-			"message": "sending too frequently, please try again later",
+			"message": common.LanguageString("sending too frequently, please try again later", "发送过于频繁，请稍后再试"),
 		})
 		c.Abort()
 		return
